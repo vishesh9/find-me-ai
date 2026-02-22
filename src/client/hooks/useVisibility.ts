@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import type { Results } from "../types/visibility";
+import type { Results, Trend } from "../../types/visibility";
 
 export function useVisibility() {
   const [primaryBrand, setPrimaryBrand] = useState("Zoho CRM");
@@ -10,13 +10,23 @@ export function useVisibility() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<Results | null>(null);
+  const [trend, setTrend] = useState<Trend | null>(null);
 
   const fetchResults = useCallback(async () => {
     try {
-      const res = await fetch("/api/results");
-      if (!res.ok) throw new Error("Failed to fetch results");
-      const data = await res.json();
+      const [resData, resTrend] = await Promise.all([
+        fetch("/api/results"),
+        fetch("/api/results/trend").catch(() => null),
+      ]);
+      if (!resData.ok) throw new Error("Failed to fetch results");
+      const data = await resData.json();
       setResults(data);
+      if (resTrend?.ok) {
+        const trendData = await resTrend.json();
+        setTrend(trendData);
+      } else {
+        setTrend(null);
+      }
     } catch (err: unknown) {
       console.error("Failed to fetch results", err);
       setError("Could not load previous results. Check server connection.");
@@ -70,6 +80,7 @@ export function useVisibility() {
   const clearData = useCallback(async () => {
     await fetch("/api/clear", { method: "POST" });
     setResults(null);
+    setTrend(null);
   }, []);
 
   const exportJSON = useCallback(() => {
@@ -92,9 +103,9 @@ export function useVisibility() {
     runsPerPrompt,
     setRunsPerPrompt,
     results,
+    trend,
     loading,
     error,
-    fetchResults,
     run,
     clearData,
     exportJSON,

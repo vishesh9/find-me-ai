@@ -1,32 +1,36 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X } from "lucide-react";
-import { Button } from "../atoms";
 
-interface ConfirmModalProps {
+export interface ModalProps {
   open: boolean;
   onClose: () => void;
-  onConfirm: () => void;
   title: string;
-  message: string;
-  confirmLabel?: string;
-  cancelLabel?: string;
-  /** Use for destructive actions (e.g. clear data) */
-  variant?: "default" | "destructive";
+  children: React.ReactNode;
+  /** Default max-w-md. Use e.g. max-w-2xl for wider content. */
+  maxWidth?: "md" | "lg" | "xl" | "2xl" | "3xl";
+  /** Optional for accessibility; defaults to title id. */
+  ariaLabelledBy?: string;
+  ariaDescribedBy?: string;
 }
 
-export function ConfirmModal({
+const maxWidthClass = {
+  md: "max-w-md",
+  lg: "max-w-lg",
+  xl: "max-w-xl",
+  "2xl": "max-w-2xl",
+  "3xl": "max-w-3xl",
+} as const;
+
+export function Modal({
   open,
   onClose,
-  onConfirm,
   title,
-  message,
-  confirmLabel = "Confirm",
-  cancelLabel = "Cancel",
-  variant = "default",
-}: ConfirmModalProps) {
-  const panelRef = useRef<HTMLDivElement>(null);
-
+  children,
+  maxWidth = "md",
+  ariaLabelledBy,
+  ariaDescribedBy,
+}: ModalProps) {
   useEffect(() => {
     if (!open) return;
     const handleEscape = (e: KeyboardEvent) => {
@@ -40,11 +44,6 @@ export function ConfirmModal({
     };
   }, [open, onClose]);
 
-  const handleConfirm = () => {
-    onConfirm();
-    onClose();
-  };
-
   return (
     <AnimatePresence>
       {open && (
@@ -52,8 +51,8 @@ export function ConfirmModal({
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
           aria-modal="true"
           role="dialog"
-          aria-labelledby="confirm-modal-title"
-          aria-describedby="confirm-modal-desc"
+          aria-labelledby={ariaLabelledBy}
+          aria-describedby={ariaDescribedBy}
         >
           <motion.div
             initial={{ opacity: 0 }}
@@ -64,17 +63,16 @@ export function ConfirmModal({
             onClick={onClose}
           />
           <motion.div
-            ref={panelRef}
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
             transition={{ duration: 0.15 }}
-            className="relative w-full max-w-md border-2 border-[#141414] bg-[#E4E3E0] p-6 shadow-lg"
+            className={`relative w-full ${maxWidthClass[maxWidth]} border-2 border-[#141414] bg-[#E4E3E0] shadow-lg flex flex-col max-h-[90vh] selection:bg-[#141414] selection:text-[#E4E3E0]`}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex justify-between items-start gap-4 mb-4">
+            <div className="flex justify-between items-start gap-4 p-6 pb-0 shrink-0">
               <h2
-                id="confirm-modal-title"
+                id={ariaLabelledBy}
                 className="text-lg font-bold tracking-tighter uppercase"
               >
                 {title}
@@ -88,24 +86,8 @@ export function ConfirmModal({
                 <X className="w-4 h-4" />
               </button>
             </div>
-            <p
-              id="confirm-modal-desc"
-              className="text-sm font-serif italic opacity-80 mb-6"
-            >
-              {message}
-            </p>
-            <div className="flex gap-3 justify-end">
-              <Button type="button" onClick={onClose}>
-                {cancelLabel}
-              </Button>
-              <Button
-                type="button"
-                variant="primary"
-                className="flex-1 max-w-[140px] py-2"
-                onClick={handleConfirm}
-              >
-                {confirmLabel}
-              </Button>
+            <div id={ariaDescribedBy} className="p-6 overflow-auto min-h-0 flex-1">
+              {children}
             </div>
           </motion.div>
         </div>

@@ -1,11 +1,15 @@
+import { useState } from "react";
 import { Database, Hash, MessageSquare, Quote, Sparkles, Clock } from "lucide-react";
-import type { RawResponse } from "../../types/visibility";
+import { Modal } from "../molecules";
+import type { RawResponse } from "../../../types/visibility";
 
 interface RawDataLogSectionProps {
   rawResponses: RawResponse[];
 }
 
 export function RawDataLogSection({ rawResponses }: RawDataLogSectionProps) {
+  const [viewingResponse, setViewingResponse] = useState<RawResponse | null>(null);
+
   return (
     <section>
       <div className="flex items-end justify-between mb-6 border-b border-[#141414] pb-2">
@@ -84,13 +88,18 @@ export function RawDataLogSection({ rawResponses }: RawDataLogSectionProps) {
                     </span>
                   </td>
                   <td className="p-3">
-                    <span className="flex items-start gap-2 font-serif italic text-xs opacity-70">
+                    <button
+                      type="button"
+                      onClick={() => setViewingResponse(resp)}
+                      className="w-full text-left flex items-start gap-2 font-serif italic text-xs opacity-70 hover:opacity-100 transition-opacity cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#141414] focus-visible:ring-inset rounded"
+                      title="View full response"
+                    >
                       <Quote className="w-3 h-3 mt-0.5 shrink-0 opacity-40" />
-                      <span className="line-clamp-1" title={resp.response_text}>
+                      <span className="line-clamp-1">
                         {resp.response_text.substring(0, 150)}
                         {resp.response_text.length > 150 ? "…" : ""}
                       </span>
-                    </span>
+                    </button>
                   </td>
                 </tr>
               );
@@ -98,6 +107,38 @@ export function RawDataLogSection({ rawResponses }: RawDataLogSectionProps) {
           </tbody>
         </table>
       </div>
+
+      <Modal
+        open={!!viewingResponse}
+        onClose={() => setViewingResponse(null)}
+        title="Response"
+        maxWidth="2xl"
+        ariaLabelledBy="response-modal-title"
+        ariaDescribedBy="response-modal-body"
+      >
+        {viewingResponse && (
+          <div id="response-modal-body" className="space-y-4">
+            <div>
+              <span className="text-[10px] uppercase font-bold opacity-60 block mb-1">Prompt</span>
+              <p className="text-sm font-medium border border-[#141414]/20 p-3 bg-[#141414]/5">
+                {viewingResponse.prompt}
+              </p>
+            </div>
+            <div>
+              <span className="text-[10px] uppercase font-bold opacity-60 block mb-1">Response</span>
+              <div className="text-sm font-serif italic border border-[#141414]/20 p-3 bg-[#141414]/5 max-h-[60vh] overflow-y-auto whitespace-pre-wrap">
+                {viewingResponse.response_text}
+              </div>
+            </div>
+            <p className="text-[10px] uppercase opacity-50">
+              Run {viewingResponse.run_number} · {viewingResponse.provider}
+              {viewingResponse.created_at
+                ? ` · ${new Date(viewingResponse.created_at).toLocaleString()}`
+                : ""}
+            </p>
+          </div>
+        )}
+      </Modal>
     </section>
   );
 }

@@ -6,3 +6,4 @@ export { EmptyState } from "./EmptyState";
 export { LeaderboardSection } from "./LeaderboardSection";
 export { PromptBreakdownSection } from "./PromptBreakdownSection";
 export { RawDataLogSection } from "./RawDataLogSection";
+export { TrendSection } from "./TrendSection";

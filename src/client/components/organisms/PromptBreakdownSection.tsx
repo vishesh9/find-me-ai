@@ -1,5 +1,5 @@
 import { Search } from "lucide-react";
-import type { PromptBreakdown } from "../../types/visibility";
+import type { PromptBreakdown } from "../../../types/visibility";
 
 interface PromptBreakdownSectionProps {
   promptBreakdown: PromptBreakdown[];

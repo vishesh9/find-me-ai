@@ -1,18 +1,33 @@
 import { motion } from "motion/react";
-import type { LeaderboardItem } from "../../types/visibility";
+import type { LeaderboardItem } from "../../../types/visibility";
+
+function formatRunDate(iso: string): string {
+  try {
+    const d = new Date(iso);
+    return isNaN(d.getTime()) ? "" : d.toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  } catch {
+    return "";
+  }
+}
 
 interface LeaderboardSectionProps {
   leaderboard: LeaderboardItem[];
   primaryBrand: string;
+  /** When set, results are for this run only. */
+  runCreatedAt?: string | null;
 }
 
-export function LeaderboardSection({ leaderboard, primaryBrand }: LeaderboardSectionProps) {
+export function LeaderboardSection({ leaderboard, primaryBrand, runCreatedAt }: LeaderboardSectionProps) {
+  const subtitle = runCreatedAt
+    ? `This run only · ${formatRunDate(runCreatedAt)}`
+    : "Aggregated Visibility Score";
+
   return (
     <section>
       <div className="flex items-end justify-between mb-6 border-b border-[#141414] pb-2">
         <h2 className="text-2xl font-bold tracking-tighter uppercase">Brand Leaderboard</h2>
         <span className="text-[10px] font-mono opacity-50 uppercase">
-          Aggregated Visibility Score
+          {subtitle}
         </span>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -35,8 +50,17 @@ export function LeaderboardSection({ leaderboard, primaryBrand }: LeaderboardSec
               </div>
               <div className="space-y-4">
                 <div className="flex justify-between items-end">
-                  <span className="text-[10px] uppercase font-bold opacity-60">Total Score</span>
-                  <span className="text-3xl font-mono font-bold leading-none">{item.totalScore}</span>
+                  <div>
+                    <span className="text-[10px] uppercase font-bold opacity-60 block">Total Score</span>
+                    <span className="text-[9px] uppercase opacity-50">8 max per response</span>
+                  </div>
+                  <span className="text-3xl font-mono font-bold leading-none">
+                    {typeof item.totalScore === "number"
+                      ? Number.isInteger(item.totalScore)
+                        ? item.totalScore
+                        : item.totalScore.toFixed(1)
+                      : item.totalScore}
+                  </span>
                 </div>
                 <div className="space-y-1">
                   <div className="flex justify-between text-[10px] uppercase font-bold">
