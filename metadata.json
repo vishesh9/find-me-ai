@@ -1,0 +1,5 @@
+{
+  "name": "Find AI",
+  "description": "POC for measuring brand visibility and share of voice in LLM responses.",
+  "requestFramePermissions": []
+}
