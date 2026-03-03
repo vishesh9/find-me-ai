@@ -1,34 +1,20 @@
-import { GoogleGenAI } from "@google/genai";
 import type { ConfigRepository } from "../db/config.repository";
+import { createLLMProvider } from "./llm/factory";
 
-export function createLLMService(
-  apiKey: string,
-  configRepo: ConfigRepository
-) {
+/**
+ * Creates the LLM service by resolving the configured provider via the factory.
+ * The service implements the same contract as ILLMProvider (generate(prompt) -> { text, provider }).
+ */
+export function createLLMService(configRepo: ConfigRepository) {
+  const provider = createLLMProvider(configRepo);
   return {
-    async generate(prompt: string): Promise<string> {
-      const temperature = parseFloat(configRepo.get("TEMPERATURE", "0"));
-      const model = configRepo.get("GEMINI_MODEL", "gemini-2.5-flash");
-
-      if (!apiKey) throw new Error("GEMINI_API_KEY not set");
-      const genAI = new GoogleGenAI({ apiKey });
-      const result = await genAI.models.generateContent({
-        model,
-        contents: [
-          {
-            role: "user",
-            parts: [
-              {
-                text: `Provide a structured, neutral, factual answer. No markdown formatting.\n\nQuestion: ${prompt}`,
-              },
-            ],
-          },
-        ],
-        config: { temperature },
-      });
-      return result.text || "";
+    get name() {
+      return provider.name;
     },
+    generate: (prompt: string) => provider.generate(prompt),
   };
 }
 
 export type LLMService = ReturnType<typeof createLLMService>;
+
+export type { ILLMProvider, GenerateResult, LLMProviderId } from "./llm/types";

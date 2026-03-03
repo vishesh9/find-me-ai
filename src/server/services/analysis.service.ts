@@ -20,13 +20,18 @@ export function analyzeResponse(
   const lowerText = text.toLowerCase();
 
   const results = brands.map((brand) => {
-    const lowerBrand = brand.toLowerCase();
-    const regex = new RegExp(brand.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi");
+    // Allow optional spaces so "ET Money" matches "ET Money", "ETMoney", "ET MONEY"
+    const pattern = brand
+      .replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+      .replace(/\s+/g, "\\s*");
+    const regex = new RegExp(pattern, "gi");
     const matches = text.match(regex) || [];
     const totalMentions = matches.length;
     const mentioned = totalMentions > 0;
-    const firstPosition = lowerText.indexOf(lowerBrand);
-    const inFirstParagraph = firstParagraph.toLowerCase().includes(lowerBrand);
+    const firstPosition =
+      matches.length > 0 ? lowerText.indexOf(matches[0].toLowerCase()) : -1;
+    const inFirstParagraph =
+      firstParagraph.length > 0 && new RegExp(pattern, "gi").test(firstParagraph);
 
     return {
       brand,

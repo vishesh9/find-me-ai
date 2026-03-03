@@ -5,12 +5,20 @@ export interface RunRow {
   user_id: string | null;
   runs_per_prompt: number;
   created_at: string;
+  inferred_category?: string | null;
+  discovery_mode?: number;
 }
 
 export interface RunBrandRow {
   run_id: string;
   brand: string;
   is_primary: number;
+  is_discovered?: number;
+}
+
+export interface InsertRunOptions {
+  inferredCategory?: string | null;
+  discoveryMode?: number;
 }
 
 export function createRunRepository(db: DatabaseInstance) {
@@ -18,18 +26,22 @@ export function createRunRepository(db: DatabaseInstance) {
     insert(
       runId: string,
       runsPerPrompt: number,
-      brands: { brand: string; isPrimary: boolean }[],
-      prompts: string[]
+      brands: { brand: string; isPrimary: boolean; isDiscovered?: boolean }[],
+      prompts: string[],
+      options?: InsertRunOptions
     ) {
+      const inferredCategory = options?.inferredCategory ?? null;
+      const discoveryMode = options?.discoveryMode ?? 0;
+
       db.prepare(
-        "INSERT INTO runs (id, user_id, runs_per_prompt) VALUES (?, ?, ?)"
-      ).run(runId, null, runsPerPrompt);
+        "INSERT INTO runs (id, user_id, runs_per_prompt, inferred_category, discovery_mode) VALUES (?, ?, ?, ?, ?)"
+      ).run(runId, null, runsPerPrompt, inferredCategory, discoveryMode);
 
       const insertBrand = db.prepare(
-        "INSERT INTO run_brands (run_id, brand, is_primary) VALUES (?, ?, ?)"
+        "INSERT INTO run_brands (run_id, brand, is_primary, is_discovered) VALUES (?, ?, ?, ?)"
       );
-      for (const { brand, isPrimary } of brands) {
-        insertBrand.run(runId, brand, isPrimary ? 1 : 0);
+      for (const { brand, isPrimary, isDiscovered } of brands) {
+        insertBrand.run(runId, brand, isPrimary ? 1 : 0, isDiscovered ? 1 : 0);
       }
 
       const insertPrompt = db.prepare(

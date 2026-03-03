@@ -62,6 +62,32 @@ export function createDatabase(dbPath: string = "visibility.db") {
     db.exec("ALTER TABLE responses ADD COLUMN run_id TEXT");
   }
 
+  // Migration: runs — inferred_category, discovery_mode
+  const runCols = db.prepare("PRAGMA table_info(runs)").all() as { name: string }[];
+  if (!runCols.some((c) => c.name === "inferred_category")) {
+    db.exec("ALTER TABLE runs ADD COLUMN inferred_category TEXT");
+  }
+  if (!runCols.some((c) => c.name === "discovery_mode")) {
+    db.exec("ALTER TABLE runs ADD COLUMN discovery_mode INTEGER NOT NULL DEFAULT 0");
+  }
+
+  // Migration: run_brands — is_discovered
+  const brandCols = db.prepare("PRAGMA table_info(run_brands)").all() as { name: string }[];
+  if (!brandCols.some((c) => c.name === "is_discovered")) {
+    db.exec("ALTER TABLE run_brands ADD COLUMN is_discovered INTEGER NOT NULL DEFAULT 0");
+  }
+
+  // New table: discovery_cache
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS discovery_cache (
+      brand_key TEXT PRIMARY KEY,
+      category TEXT NOT NULL,
+      competitors_json TEXT NOT NULL,
+      prompts_json TEXT NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+  `);
+
   db.exec(`
     CREATE INDEX IF NOT EXISTS idx_responses_run_id ON responses(run_id);
     CREATE INDEX IF NOT EXISTS idx_runs_created_at ON runs(created_at);

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Database, Hash, MessageSquare, Quote, Sparkles, Clock } from "lucide-react";
-import { Modal } from "../molecules";
+import { Modal } from "../molecules/Modal";
 import type { RawResponse } from "../../../types/visibility";
 
 interface RawDataLogSectionProps {

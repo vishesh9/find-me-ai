@@ -104,6 +104,15 @@ export function createResultsService(
           runId: latestRun.id,
           createdAt: latestRun.created_at,
           primaryBrand: primary?.brand,
+          inferredCategory: latestRun.inferred_category ?? undefined,
+          ...(latestRun.discovery_mode === 1
+            ? {
+                discoveredCompetitors: runBrands
+                  .filter((r) => r.is_discovered === 1)
+                  .map((r) => r.brand),
+                discoveredPrompts: Array.from(new Set(responses.map((r) => r.prompt))),
+              }
+            : {}),
         };
       }
 

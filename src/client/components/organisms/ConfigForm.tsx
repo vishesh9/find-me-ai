@@ -1,6 +1,9 @@
-import { Settings, Play, Loader2, AlertCircle } from "lucide-react";
+import { useState } from "react";
+import { Settings, Play, Loader2, AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { Button, Input, Textarea, Label } from "../atoms";
+import { Button } from "../atoms/Button";
+import { Input, Textarea } from "../atoms/Input";
+import { Label } from "../atoms/Label";
 
 interface ConfigFormProps {
   primaryBrand: string;
@@ -29,6 +32,8 @@ export function ConfigForm({
   error,
   onRun,
 }: ConfigFormProps) {
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+
   return (
     <aside className="lg:col-span-3 border-r border-[#141414] p-6 space-y-8">
       <section>
@@ -37,48 +42,91 @@ export function ConfigForm({
         </h2>
         <div className="space-y-4">
           <div>
-            <Label>Primary Brand</Label>
+            <Label>Your brand (name or website)</Label>
             <Input
               type="text"
               value={primaryBrand}
               onChange={(e) => setPrimaryBrand(e.target.value)}
+              placeholder="e.g. Freshworks or freshworks.com"
             />
-          </div>
-          <div>
-            <Label>Competitors (comma separated)</Label>
-            <Textarea
-              value={competitors}
-              onChange={(e) => setCompetitors(e.target.value)}
-              className="h-20 resize-none"
-              rows={4}
-            />
-          </div>
-          <div>
-            <Label>Prompts (one per line)</Label>
-            <Textarea
-              value={prompts}
-              onChange={(e) => setPrompts(e.target.value)}
-              className="h-32 resize-none"
-              rows={6}
-            />
+            <p className="text-[10px] uppercase opacity-50 mt-1.5">
+              We&apos;ll find your category and competitors and run representative queries.
+            </p>
           </div>
           <div className="grid grid-cols-1 gap-2">
             <div>
-              <Label>Runs/Prompt</Label>
+              <Label>Runs per prompt</Label>
               <Input
                 type="number"
+                min={1}
                 value={isNaN(runsPerPrompt) ? "" : runsPerPrompt}
                 onChange={(e) => {
                   const val = parseInt(e.target.value, 10);
-                  setRunsPerPrompt(isNaN(val) ? 0 : val);
+                  setRunsPerPrompt(isNaN(val) ? 1 : Math.max(1, val));
                 }}
               />
             </div>
           </div>
-          <Button variant="primary" onClick={onRun} disabled={loading}>
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
-            Run Analysis
+          <Button
+            variant="primary"
+            onClick={onRun}
+            disabled={loading || !primaryBrand.trim()}
+          >
+            {loading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Play className="w-4 h-4" />
+            )}
+            Run analysis
           </Button>
+
+          <button
+            type="button"
+            onClick={() => setAdvancedOpen((o) => !o)}
+            className="text-[10px] font-mono uppercase opacity-60 hover:opacity-100 flex items-center gap-1"
+          >
+            {advancedOpen ? (
+              <ChevronUp className="w-3 h-3" />
+            ) : (
+              <ChevronDown className="w-3 h-3" />
+            )}
+            Customize competitors & prompts
+          </button>
+
+          <AnimatePresence>
+            {advancedOpen && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="space-y-4 overflow-hidden"
+              >
+                <div>
+                  <Label>Competitors (comma separated)</Label>
+                  <Textarea
+                    value={competitors}
+                    onChange={(e) => setCompetitors(e.target.value)}
+                    className="h-20 resize-none"
+                    rows={4}
+                    placeholder="Leave empty to use discovery"
+                  />
+                </div>
+                <div>
+                  <Label>Prompts (one per line)</Label>
+                  <Textarea
+                    value={prompts}
+                    onChange={(e) => setPrompts(e.target.value)}
+                    className="h-32 resize-none"
+                    rows={6}
+                    placeholder="Leave empty to use discovery"
+                  />
+                </div>
+                <p className="text-[10px] uppercase opacity-50">
+                  When both are filled, we use these instead of discovery.
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <AnimatePresence>
             {error && (

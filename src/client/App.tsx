@@ -1,17 +1,16 @@
 import React, { useState } from "react";
 import { useVisibility } from "./hooks/useVisibility";
-import { MainLayout } from "./components/templates";
-import {
-  AppHeader,
-  AppFooter,
-  ConfigForm,
-  ConfirmModal,
-  LeaderboardSection,
-  TrendSection,
-  PromptBreakdownSection,
-  RawDataLogSection,
-  EmptyState,
-} from "./components/organisms";
+import { MainLayout } from "./components/templates/MainLayout";
+import { AppHeader } from "./components/organisms/AppHeader";
+import { AppFooter } from "./components/organisms/AppFooter";
+import { ConfigForm } from "./components/organisms/ConfigForm";
+import { ConfirmModal } from "./components/organisms/ConfirmModal";
+import { RunSummary } from "./components/organisms/RunSummary";
+import { LeaderboardSection } from "./components/organisms/LeaderboardSection";
+import { TrendSection } from "./components/organisms/TrendSection";
+import { PromptBreakdownSection } from "./components/organisms/PromptBreakdownSection";
+import { RawDataLogSection } from "./components/organisms/RawDataLogSection";
+import { EmptyState } from "./components/organisms/EmptyState";
 
 export default function App() {
   const [showClearModal, setShowClearModal] = useState(false);
@@ -76,6 +75,9 @@ export default function App() {
           <EmptyState />
         ) : (
           <div className="space-y-12">
+            {results.runInfo && (
+              <RunSummary runInfo={results.runInfo} primaryBrand={primaryBrand} />
+            )}
             <LeaderboardSection
               leaderboard={results.leaderboard}
               primaryBrand={results.runInfo?.primaryBrand ?? primaryBrand}

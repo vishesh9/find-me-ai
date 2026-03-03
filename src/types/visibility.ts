@@ -27,6 +27,10 @@ export interface RunInfo {
   createdAt: string;
   /** Primary brand for this run (from run_brands.is_primary). */
   primaryBrand?: string;
+  /** When discovery was used (discovery_mode=1). */
+  inferredCategory?: string;
+  discoveredCompetitors?: string[];
+  discoveredPrompts?: string[];
 }
 
 export interface Results {

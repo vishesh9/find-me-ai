@@ -4,6 +4,7 @@ import { createRunHandler } from "./run";
 import { createClearHandler } from "./clear";
 import type { ResultsService } from "../services/results.service";
 import type { LLMService } from "../services/llm.service";
+import type { DiscoveryService } from "../services/discovery.service";
 import type { RunRepository } from "../db/run.repository";
 import type { ResponseRepository } from "../db/response.repository";
 import type { AnalysisRepository } from "../db/analysis.repository";
@@ -11,6 +12,7 @@ import type { AnalysisRepository } from "../db/analysis.repository";
 export interface ApiDeps {
   resultsService: ResultsService;
   llmService: LLMService;
+  discoveryService: DiscoveryService;
   runRepo: RunRepository;
   responseRepo: ResponseRepository;
   analysisRepo: AnalysisRepository;

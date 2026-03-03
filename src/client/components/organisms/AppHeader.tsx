@@ -1,5 +1,5 @@
 import { Database, Trash2, Download } from "lucide-react";
-import { Button } from "../atoms";
+import { Button } from "../atoms/Button";
 
 interface AppHeaderProps {
   onClear: () => void;

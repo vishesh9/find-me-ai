@@ -4,13 +4,15 @@ import { fileURLToPath } from "url";
 import { createServer as createViteServer } from "vite";
 import express from "express";
 
-import { config } from "./src/server/config";
+import { config } from "./src/server/config/config";
 import { createDatabase } from "./src/server/db/database";
 import { createConfigRepository } from "./src/server/db/config.repository";
 import { createRunRepository } from "./src/server/db/run.repository";
 import { createResponseRepository } from "./src/server/db/response.repository";
 import { createAnalysisRepository } from "./src/server/db/analysis.repository";
+import { createDiscoveryRepository } from "./src/server/db/discovery.repository";
 import { createLLMService } from "./src/server/services/llm.service";
+import { createDiscoveryService } from "./src/server/services/discovery.service";
 import { createResultsService } from "./src/server/services/results.service";
 import { createApp } from "./src/server/app";
 import { log } from "./src/server/lib/logger";
@@ -28,13 +30,16 @@ const responseRepo = createResponseRepository(db);
 const analysisRepo = createAnalysisRepository(db);
 
 // Services
-const llmService = createLLMService(config.gemini.apiKey, configRepo);
+const llmService = createLLMService(configRepo);
+const discoveryRepo = createDiscoveryRepository(db);
+const discoveryService = createDiscoveryService(llmService, discoveryRepo);
 const resultsService = createResultsService(runRepo, responseRepo, analysisRepo);
 
 // Express app and API
 const app = createApp({
   resultsService,
   llmService,
+  discoveryService,
   runRepo,
   responseRepo,
   analysisRepo,

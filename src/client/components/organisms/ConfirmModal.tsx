@@ -1,6 +1,6 @@
 import React from "react";
-import { Modal } from "../molecules";
-import { Button } from "../atoms";
+import { Modal } from "../molecules/Modal";
+import { Button } from "../atoms/Button";
 
 interface ConfirmModalProps {
   open: boolean;
